@@ -29,6 +29,7 @@ impl TasksPanel.addTask(e: FormEvent) -> None {
 }
 
 impl TasksPanel.toggleTask(id: str) -> None {
+    if reporting { return; }
     error = "";
     try {
         await toggle_task(id);
@@ -39,11 +40,30 @@ impl TasksPanel.toggleTask(id: str) -> None {
 }
 
 impl TasksPanel.deleteTask(id: str) -> None {
+    if reporting { return; }
     error = "";
     try {
         await delete_task(id);
         tasks = await get_tasks();
     } except Exception {
         error = "Could not delete the task. Please retry.";
+    }
+}
+
+impl TasksPanel.recordBlocker(id: str, reason: str, note: str) -> None {
+    if reporting { return; }
+    reporting = True;
+    error = "";
+    try {
+        saved = await record_task_blocker(id, reason, note);
+        if saved is None {
+            error = "This task is no longer available. Reload tasks.";
+        } else {
+            tasks = await get_tasks();
+        }
+    } except Exception {
+        error = "Could not record the blocker. Reload tasks before retrying to check whether it was saved.";
+    } finally {
+        reporting = False;
     }
 }

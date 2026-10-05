@@ -117,7 +117,66 @@ def:protect clear_shopping_list -> dict[str, bool] {
 node Task{
     has title: str,
         done: bool = False,
-        category: str = "other";
+        category: str = "other",
+        blocker_reason: str = "",
+        blocker_note: str = "",
+        blocker_count: int = 0;
+}
+
+"""Record the latest blocker for an unfinished task owned by this user."""
+def:protect record_task_blocker(id: str, reason: str, note: str = "") -> Task | None {
+    if reason not in ["no_time", "low_energy", "too_large", "unclear", "missing_resource", "other"] {
+        raise ValueError("Choose a supported blocker reason.");
+    }
+    if len(note.strip()) > 500 {
+        raise ValueError("Keep the note within 500 characters.");
+    }
+    for task in [root-->][?:Task] {
+        if jid(task) == id {
+            if task.done { raise ValueError("Reopen the task before reporting a blocker."); }
+            task.blocker_reason = reason;
+            task.blocker_note = note.strip();
+            task.blocker_count += 1;
+            return task;
+        }
+    }
+    return None;
+}
+
+test "blocker updates preserve task and record repeated attempts" {
+    task = root ++> Task(title="Blocker test");
+    try {
+        saved = record_task_blocker(jid(task), "unclear", "  Need requirements  ");
+        assert saved is not None;
+        assert saved.blocker_note == "Need requirements";
+        assert not saved.done;
+        assert saved.title == "Blocker test";
+        saved = record_task_blocker(jid(task), "too_large");
+        assert saved is not None;
+        assert saved.blocker_count == 2;
+        assert saved.blocker_reason == "too_large";
+        assert saved.blocker_note == "";
+    } finally { del task; }
+}
+
+test "invalid blocker inputs leave the task unchanged" {
+    task = root ++> Task(title="Validation test");
+    try {
+        with testraises(ValueError) { record_task_blocker(jid(task), "unknown"); }
+        with testraises(ValueError) { record_task_blocker(jid(task), "other", "x" * 501); }
+        assert task.blocker_count == 0;
+        task.done = True;
+        with testraises(ValueError) { record_task_blocker(jid(task), "no_time"); }
+        assert task.blocker_count == 0;
+    } finally { del task; }
+}
+
+test "blocker cannot target a task outside the current root" {
+    unattached = Task(title="Not owned by current root");
+    try {
+        assert record_task_blocker(jid(unattached), "no_time") is None;
+        assert unattached.blocker_count == 0;
+    } finally { del unattached; }
 }
 
 def:protect add_task(title: str) -> Task{

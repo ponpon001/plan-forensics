@@ -1,5 +1,5 @@
 """Task management panel. Mounted only for an authenticated user."""
-import from endpoints { Task, add_task, get_tasks, toggle_task, delete_task }
+import from endpoints { Task, add_task, get_tasks, toggle_task, delete_task, record_task_blocker }
 import from .TaskItem { TaskItem }
 
 def:pub TasksPanel -> JsxElement {
@@ -7,6 +7,7 @@ def:pub TasksPanel -> JsxElement {
         taskText: str = "",
         loading: bool = True,
         adding: bool = False,
+        reporting: bool = False,
         error: str = "";
 
     can with entry {
@@ -17,6 +18,7 @@ def:pub TasksPanel -> JsxElement {
     async def addTask(e: FormEvent) -> None;
     async def toggleTask(id: str) -> None;
     async def deleteTask(id: str) -> None;
+    async def recordBlocker(id: str, reason: str, note: str) -> None;
 
     remaining = len([
         task for task in tasks
@@ -68,6 +70,11 @@ def:pub TasksPanel -> JsxElement {
                 title={task.title}
                 done={task.done}
                 category={task.category}
+                blockerReason={task.blocker_reason}
+                blockerNote={task.blocker_note}
+                blockerCount={task.blocker_count}
+                busy={reporting}
+                onBlock={recordBlocker}
                 onToggle={toggleTask}
                 onDelete={deleteTask}
             />
