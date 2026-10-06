@@ -134,3 +134,7 @@ jac build --platform web mobile
 ```
 
 Before submitting, verify the author details at the top of this README and try the commands from a fresh checkout.
+
+## Attribution
+
+Built on the [Jac AI Day Planner tutorial](https://www.jac-lang.org/tutorials/first-app/build-ai-day-planner/). Plan Forensics extends that foundation with an implemented blocker-and-recovery workflow across web, mobile, and CLI clients.
