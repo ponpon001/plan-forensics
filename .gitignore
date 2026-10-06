@@ -2,11 +2,8 @@
 node_modules/
 .vscode/
 .idea/
-
-# Generated application bundles
 dist/
-
-# Local secrets and per-machine configuration
+*.jab
 .env
 .env.*
 !.env.example
