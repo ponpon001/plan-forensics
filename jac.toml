@@ -1,20 +1,34 @@
 [project]
-name = "day-planner"
-version = "0.1.0"
-description = "A full-stack Jac application"
-entry-point = "main"
+name = "plan-forensics"
+version = "1.0.0"
+description = "An AI-assisted planning recovery workspace"
+default-app = "web"
+jac-version = "==0.37.23"
+
+[apps]
+[apps.web]
 kind = "web-app"
-jac-version = "==0.37.21"
+entry-point = "main"
+
+[apps.mobile]
+kind = "mobile"
+entry-point = "mobile"
+
+[apps.cli]
+kind = "cli"
+entry-point = "cli"
+
+[apps.planner]
+kind = "service"
+entry-point = "endpoints"
 
 [dependencies]
 "byllm[local]" = ">=0.0.0"
+
 [dependencies.npm]
 react = "^19.2.0"
 react-dom = "^19.2.0"
-react-router-dom = "^6.22.0"
-react-error-boundary = "^5.0.0"
-"@tanstack/react-form" = "^1.33.0"
-zod = "^4.3.6"
+react-native-web = "^0.21.2"
 
 [dependencies.npm.dev]
 vite = "^6.4.1"
@@ -23,12 +37,21 @@ typescript = "^5.3.3"
 "@types/react" = "^19.2.0"
 "@types/react-dom" = "^19.2.0"
 
-
-
 [dev-dependencies]
 watchdog = ">=3.0.0"
 
 [client]
+[client.app_meta_data]
+title = "Plan Forensics"
+description = "Find the next move when a plan gets stuck."
+theme_color = "#f7f7f5"
 
 [byllm.model]
-default_model = "ollama/gemma3:4b"
+# Instructor: choose any byLLM-supported model and provide its key through
+# the matching environment variable. Never paste a real key into this file.
+default_model = "gpt-4o-mini"
+api_key = "${OPENAI_API_KEY}"
+
+[byllm.call_params]
+temperature = 0.2
+max_output_retries = 2
