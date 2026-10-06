@@ -2,3 +2,12 @@
 node_modules/
 .vscode/
 .idea/
+
+# Generated application bundles
+dist/
+
+# Local secrets and per-machine configuration
+.env
+.env.*
+!.env.example
+jac.local.toml
